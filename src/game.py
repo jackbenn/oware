@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class Board:
+class Game:
     def __init__(self, size=6):
         self.size = size
         self.initial = 4
@@ -26,6 +26,14 @@ class Board:
         s += '\n'
         return s
 
+    def get_state(self, player):
+        if self.player == 0:
+            return np.concatenate((self.houses[0],
+                                   self.houses[1, ::-1]))
+        else:
+            return np.concatenate((self.houses[1, ::-1],
+                                   self.houses[0]))
+
     def check_done(self):
         if self.score[0] >= self.to_win:
             self.done = True
@@ -40,6 +48,12 @@ class Board:
 
 
     def move(self, house):
+        '''
+        Have current player (self.player) move
+        Parameters:
+            house : (int) house to sow, starting with the left-most as 0
+        Returns: (int) number of captures
+        '''
         save = self.houses.copy()
         seeds = self.houses[self.player, house]
         self.houses[self.player, house] = 0
@@ -55,27 +69,39 @@ class Board:
             seeds -= 1
             current_house += 1
 
-        if current_side != self.player:
-            self.capture(current_side, current_house-1)
+        captures = self.capture(current_side, current_house-1)
         
         self.player = 1 - self.player
+        return captures
 
     def capture(self, side, house):
+        '''
+        Capture stones (if play in current side)
+        Parameters:
+            house: house
+        '''
+        captures = 0
+
+        if side == self.player:
+            return captures
+
         # check for grand slam
         if (house == self.size and np.all((self.houses[side] == 2) |
                                            self.houses[side] == 3)):
-            return
+            return captures
+
         current_house = house
         while (self.houses[side, current_house] in (2, 3) and
                current_house >= 0):
-
-            self.score[1-side] += self.houses[side, house]
+            captures += self.houses[side, house]
             self.houses[side, house] = 0
             current_house -= 1
+        self.score[1-side] += captures
+        return captures
 
 
 if __name__ == '__main__':
-    b = Board()
+    b = Game()
     print(b)
     b.move(2)
     print(b)

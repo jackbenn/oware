@@ -1,12 +1,17 @@
+from game import Game
+from agent import Agent
 
 class Manager:
     def __init__(self):
-        self.agent1 = Agent()
-        self.agent2 = Agent()
+        self.agents = [Agent(),
+                       Agent()
 
     def play_game(self):
         '''play a single game between agents'''
-        game = Board()
+        game = Game()
+        player = 0
+        state = game.state(player)
+        
     
     def load_agents(self):
         '''load agent weights from file'''
