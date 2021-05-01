@@ -5,10 +5,12 @@ from tensorflow.keras.models import Model
 
 
 class Agent:
-    def __init__(self, size=6):
+    def __init__(self, epsilon, discount=1, size=6):
+        self.discount = discount
+        self.epsilon = epsilon
         self.size = size
         self.initialize_model()
-
+    
     def initialize_model(self):
         inputs = Input(self.size * 2, name='input')
         x = inputs
@@ -17,16 +19,25 @@ class Agent:
         x = Dense(self.size, name='output')(x)
         self.model = Model(inputs, x, name='model')
         # no idea the best opitmizer
-        self.model.compile(optimizer='rmsprop',
+        self.model.compile(optimizer='adam',
                            loss='mean_squared_error')
 
-    def update(self, state, action, next_state, reward=0, terminal=False):
-        # not sure of the inputs
-        pass
+    def update(self, last_state, last_action, reward, state):
+        # terminal state has state == None
+        if state is None:
+            qmax = 0
+        else:
+            qmax = np.max(self.predict(state))
+        
+        last_qs = self.predict(last_state)
+        print(last_qs)
+        last_qs[last_action] = reward + self.discount * qmax
+        self.model.fit(last_state[None, :],
+                       last_qs[None, :])
 
-    def move(self, last_state, reward, state):
+    def move(self, last_state, last_action, reward, state):
         '''Decide on the next move and update the model
-         * Predict the q values for all the possible actions
+         * Predict the q values for all the possible actions from state
          * Update the model based on the rewards from the prior step
          * Choose the best action following epsilon-greedy
         Parameters:
@@ -37,7 +48,20 @@ class Agent:
             the new state
             the reward from that move?
         '''
-        pass
+        if last_state is not None: # if this isn't the first move
+            self.update(last_state, last_action, reward, state)
+    
+        if state is None:  # if we're done with the game
+            return
 
-    def predict_q(self, state):
-        return self.model.predict(state[1, -1])
+        qs = self.predict(state)
+        if np.random.random() < self.epsilon:
+            action = np.random.randint(self.size)
+        else:
+            # choose randomly among ties
+            action = np.random.choice(np.flatnonzero(qs ==
+                                                     qs.max()))
+        return action
+
+    def predict(self, state):
+        return self.model.predict(state[None, :])[0]
