@@ -3,6 +3,7 @@ from tensorflow import keras
 from tensorflow.keras.layers import Activation, Dense, Input
 from tensorflow.keras.models import Model
 
+
 class Agent:
     def __init__(self, size=6):
         self.size = size
@@ -37,7 +38,6 @@ class Agent:
             the reward from that move?
         '''
         pass
-    
+
     def predict_q(self, state):
         return self.model.predict(state[1, -1])
-

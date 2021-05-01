@@ -46,7 +46,6 @@ class Game:
             self.winner = 0.5
         return self.done
 
-
     def move(self, house):
         '''
         Have current player (self.player) move
@@ -70,7 +69,7 @@ class Game:
             current_house += 1
 
         captures = self.capture(current_side, current_house-1)
-        
+
         self.player = 1 - self.player
         return captures
 
@@ -86,8 +85,9 @@ class Game:
             return captures
 
         # check for grand slam
-        if (house == self.size and np.all((self.houses[side] == 2) |
-                                           self.houses[side] == 3)):
+        if (house == self.size and
+            np.all((self.houses[side] == 2) |
+                   (self.houses[side] == 3))):
             return captures
 
         current_house = house
