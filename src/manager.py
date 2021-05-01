@@ -11,17 +11,29 @@ class Manager:
         '''play a single game between agents'''
         game = Game()
         player = 0
-        state = game.state(player)
-        rewards = []
-        states = []
-        states.append(game.state)
-        rewards.append(agent[0].move(state[-2], 0, states[-1]))
+        states = [[None], [None]]
+        actions = [[None], [None]]
 
         while True:
-            states.append(game.state)
-            reward = rewards[-1] - rewards[-2]
-            rewards.append(agent[1].move(state,
-                                         states[-1]))
+            agent = self.agents[player]
+            states[player].append(game.state)
+            result = agent.move(states[player][-2],
+                                actions[player][-1],
+                                0,
+                                states[player][-1])
+            (action, reward, done) = result
+            actions[player].append(action)
+            if done:
+                agent.move(states[player][-1],
+                           actions[player][-1],
+                           1,
+                           None)
+                agents[1-player].move(states[1-player][-1],
+                                      actions[1-player][-1],
+                                      -1,
+                                      None)
+                break
+            player = 1 - player
 
     def load_agents(self):
         '''load agent weights from file'''
