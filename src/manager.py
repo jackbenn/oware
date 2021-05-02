@@ -1,19 +1,23 @@
 import os
+import numpy as np
 from game import Game
 from agent import Agent
 
 
 class Manager:
-    def __init__(self):
-        self.agents = [Agent(epsilon=0.1),
-                       Agent(epsilon=0.1)]
+    def __init__(self, size=6):
+        self.size = size
+        self.agents = [Agent(epsilon=0.1, size=self.size),
+                       Agent(epsilon=0.1, size=self.size)]
 
     def play_game(self):
         '''play a single game between agents'''
-        game = Game()
+        game = Game(size=self.size)
         player = 0
         states = [[None], [None]]
         actions = [[None], [None]]
+        old_score = (0, 0)
+
 
         t = 0
         while True:
@@ -37,12 +41,14 @@ class Manager:
                                            -reward,
                                            None)
                 break
-            print(f"{t:3} Player {player} moved {action} score {game.score}")
-            if t%100 == 0:
+            if (game.score != old_score).any():
+                print(f"{t:3} Player {player} moved {action} score {game.score}")
                 print(game)
+                old_score = game.score.copy()
 
             player = 1 - player
             t += 1
+        return game.winner
 
     def load_agents(self):
         '''load agents from file if they exist'''
@@ -59,12 +65,12 @@ class Manager:
 
 
 if __name__ == '__main__':
-    m = Manager()
+    m = Manager(size=3)
     m.load_agents()
 
     m.save_agents()
-    for i in range(1):
-        print("\nPlaying game {I}")
-        m.play_game()
-    
-    m.save_agents()
+    for i in range(10):
+        print(f"\nPlaying game {i}")
+        winner = m.play_game()
+        print(f"Winner is {winner}")
+        m.save_agents()

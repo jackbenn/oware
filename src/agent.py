@@ -14,8 +14,8 @@ class Agent:
     def initialize_model(self):
         inputs = Input(self.size * 2, name='input')
         x = inputs
+        x = Dense(16)(x)
         x = Dense(32)(x)
-        x = Dense(64)(x)
         x = Dense(self.size, name='output')(x)
         self.model = Model(inputs, x, name='model')
         # no idea the best opitmizer

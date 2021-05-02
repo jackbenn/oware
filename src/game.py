@@ -40,10 +40,16 @@ class Game:
             self.winner = 0
         elif self.score[1] >= self.to_win:
             self.done = True
-            self.winner = 0
+            self.winner = 1
         elif self.score[0] == self.score[1] == self.to_win - 1:
             self.done = True
             self.winner = 0.5
+        elif self.houses[0].max() == 0:
+            self.done = True
+            self.winner = 0
+        elif self.houses[1].max() == 0:
+            self.done = True
+            self.winner = 1
         return self.done
 
     def move(self, house):
