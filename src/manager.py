@@ -14,6 +14,7 @@ class Manager:
         states = [[None], [None]]
         actions = [[None], [None]]
 
+        t = 0
         while True:
             agent = self.agents[player]
             states[player].append(game.get_state(player))
@@ -25,18 +26,22 @@ class Manager:
             game.move(action)
 
             if game.done:
-                reward = 1 if player == self.game.winner else -1
+                reward = 1 if player == game.winner else -1
                 agent.move(states[player][-1],
                            actions[player][-1],
                            reward,
                            None)
-                agents[1-player].move(states[1-player][-1],
-                                      actions[1-player][-1],
-                                      -reward,
-                                      None)
+                self.agents[1-player].move(states[1-player][-1],
+                                           actions[1-player][-1],
+                                           -reward,
+                                           None)
                 break
-            print(f"Player {player} moved {action}")
+            print(f"{t:3} Player {player} moved {action} score {game.score}")
+            if t%1 == 0:
+                print(game)
+
             player = 1 - player
+            t += 1
 
     def load_agents(self):
         '''load agent weights from file'''

@@ -62,15 +62,16 @@ class Game:
             if current_house == self.size:
                 current_house = 0
                 current_side = 1 - current_side
-            if current_house == house and current_side == self.player:
-                continue
-            self.houses[current_side, current_house] += 1
+            # if we aren't back at the starting point
+            if current_house != house or current_side != self.player:
+                self.houses[current_side, current_house] += 1
             seeds -= 1
             current_house += 1
 
         captures = self.capture(current_side, current_house-1)
 
         self.player = 1 - self.player
+        self.check_done()
         return captures
 
     def capture(self, side, house):

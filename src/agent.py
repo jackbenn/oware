@@ -30,10 +30,11 @@ class Agent:
             qmax = np.max(self.predict(state))
         
         last_qs = self.predict(last_state)
-        print(last_qs)
+        #print(last_qs)
         last_qs[last_action] = reward + self.discount * qmax
         self.model.fit(last_state[None, :],
-                       last_qs[None, :])
+                       last_qs[None, :],
+                        verbose=0)
 
     def move(self, last_state, last_action, reward, state):
         '''Decide on the next move and update the model
@@ -56,11 +57,13 @@ class Agent:
 
         qs = self.predict(state)
         if np.random.random() < self.epsilon:
+            print('random', end='')
             action = np.random.randint(self.size)
         else:
             # choose randomly among ties
             action = np.random.choice(np.flatnonzero(qs ==
                                                      qs.max()))
+        print(action)
         return action
 
     def predict(self, state):
