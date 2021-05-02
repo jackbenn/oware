@@ -57,14 +57,20 @@ class Agent:
 
         qs = self.predict(state)
         if np.random.random() < self.epsilon:
-            print('random', end='')
+            #print('random', end='')
             action = np.random.randint(self.size)
         else:
             # choose randomly among ties
             action = np.random.choice(np.flatnonzero(qs ==
                                                      qs.max()))
-        print(action)
+        #print(action)
         return action
 
     def predict(self, state):
         return self.model.predict(state[None, :])[0]
+
+    def save(self, filename):
+        self.model.save(filename)
+
+    def load(self, filename):
+        self.model = keras.models.load_model(filename)

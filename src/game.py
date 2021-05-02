@@ -65,7 +65,7 @@ class Game:
             # if we aren't back at the starting point
             if current_house != house or current_side != self.player:
                 self.houses[current_side, current_house] += 1
-            seeds -= 1
+                seeds -= 1
             current_house += 1
 
         captures = self.capture(current_side, current_house-1)

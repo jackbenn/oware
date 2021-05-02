@@ -1,3 +1,4 @@
+import os
 from game import Game
 from agent import Agent
 
@@ -37,23 +38,33 @@ class Manager:
                                            None)
                 break
             print(f"{t:3} Player {player} moved {action} score {game.score}")
-            if t%1 == 0:
+            if t%100 == 0:
                 print(game)
 
             player = 1 - player
             t += 1
 
     def load_agents(self):
-        '''load agent weights from file'''
-        agent[0].load('agent0')
-        agent[1].load('agent1')
+        '''load agents from file if they exist'''
+        if os.path.exists('agent0') and os.path.exists('agent1'):
+            self.agents[0].load('agent0')
+            self.agents[1].load('agent1')
+            return True
+        return False
 
     def save_agents(self):
         '''save agent weights to file'''
-        agent[0].save('agent0')
-        agent[1].save('agent1')
+        self.agents[0].save('agent0')
+        self.agents[1].save('agent1')
 
 
 if __name__ == '__main__':
     m = Manager()
-    m.play_game()
+    m.load_agents()
+
+    m.save_agents()
+    for i in range(1):
+        print("\nPlaying game {I}")
+        m.play_game()
+    
+    m.save_agents()
