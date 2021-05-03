@@ -8,7 +8,7 @@ from agent import Agent
 class Manager:
     def __init__(self, size=6):
         self.size = size
-        self.agent_names = [None, None]
+        self.model_names = [None, None]
         self.agents = [Agent(epsilon=0.1, size=self.size),
                        Agent(epsilon=0.1, size=self.size)]
 
@@ -55,13 +55,13 @@ class Manager:
 
     def load_agents(self):
         '''load from file if exists or initialize'''
-        self.agents[0].load('agent0')
-        self.agents[1].load('agent1')
+        self.agents[0].load(self.model_names[0])
+        self.agents[1].load(self.model_names[1])
 
     def save_agents(self):
         '''save agent weights to file'''
-        self.agents[0].save('agent0')
-        self.agents[1].save('agent1')
+        self.agents[0].save(self.model_names[0])
+        self.agents[1].save(self.model_names[1])
 
 
 if __name__ == '__main__':
@@ -71,8 +71,17 @@ if __name__ == '__main__':
                         action='store',
                         type=int,
                         default=1)
+    parser.add_argument('-0', '--model0',
+                        help='Name of model for Agent 0',
+                        action='store',
+                        default='model0')
+    parser.add_argument('-1', '--model1',
+                        help='Name of model for Agent 1',
+                        action='store',
+                        default='model1')
     args = parser.parse_args()
     m = Manager(size=3)
+    m.model_names = [args.model0, args.model1]
     m.load_agents()
     m.save_agents()
     for i in range(args.count):
