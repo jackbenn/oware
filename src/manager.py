@@ -1,4 +1,5 @@
 import os
+import argparse
 import numpy as np
 from game import Game
 from agent import Agent
@@ -7,6 +8,7 @@ from agent import Agent
 class Manager:
     def __init__(self, size=6):
         self.size = size
+        self.agent_names = [None, None]
         self.agents = [Agent(epsilon=0.1, size=self.size),
                        Agent(epsilon=0.1, size=self.size)]
 
@@ -41,22 +43,20 @@ class Manager:
                                            -reward,
                                            None)
                 break
-            if (game.score != old_score).any():
+            if tuple(game.score) != old_score:
                 print(f"{t:3} Player {player} moved {action} score {game.score}")
                 print(game)
-                old_score = game.score.copy()
+                old_score = tuple(game.score)
 
             player = 1 - player
             t += 1
+        print(f"{t:3} Winner is {game.winner}")
         return game.winner
 
     def load_agents(self):
-        '''load agents from file if they exist'''
-        if os.path.exists('agent0') and os.path.exists('agent1'):
-            self.agents[0].load('agent0')
-            self.agents[1].load('agent1')
-            return True
-        return False
+        '''load from file if exists or initialize'''
+        self.agents[0].load('agent0')
+        self.agents[1].load('agent1')
 
     def save_agents(self):
         '''save agent weights to file'''
@@ -65,12 +65,17 @@ class Manager:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--count',
+                        help='Number of games',
+                        action='store',
+                        type=int,
+                        default=1)
+    args = parser.parse_args()
     m = Manager(size=3)
     m.load_agents()
-
     m.save_agents()
-    for i in range(10):
+    for i in range(args.count):
         print(f"\nPlaying game {i}")
         winner = m.play_game()
-        print(f"Winner is {winner}")
         m.save_agents()

@@ -1,15 +1,18 @@
 import numpy as np
+import os
 from tensorflow import keras
 from tensorflow.keras.layers import Activation, Dense, Input
 from tensorflow.keras.models import Model
 
 
 class Agent:
+    model_dir = 'models'
+
     def __init__(self, epsilon, discount=1, size=6):
         self.discount = discount
         self.epsilon = epsilon
         self.size = size
-        self.initialize_model()
+        self.model = None
     
     def initialize_model(self):
         inputs = Input(self.size * 2, name='input')
@@ -70,7 +73,12 @@ class Agent:
         return self.model.predict(state[None, :])[0]
 
     def save(self, filename):
-        self.model.save(filename)
+        path = os.path.join(self.model_dir, filename)
+        self.model.save(path)
 
     def load(self, filename):
-        self.model = keras.models.load_model(filename)
+        path = os.path.join(self.model_dir, filename)
+        if os.path.exists(path):
+            self.model = keras.models.load_model(path)
+        else:
+            self.initialize_model()
