@@ -7,9 +7,9 @@ class Game:
         self.initial = 3
         self.to_win = 2
         #self.to_win = self.size * self.initial + 1
-        self.empty_state = np.zeros((2, self.size, 2*self.size*self.initial))
+        self.empty_state = np.zeros((2, self.size, 2*self.size*self.initial+1))
         self.houses = np.full((2, size),
-                              fill_value=4,
+                              fill_value=self.initial,
                               dtype=int)
         self.score = np.zeros(2, dtype=int)
         self.player = 0
