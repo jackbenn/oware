@@ -7,6 +7,7 @@ class Game:
         self.initial = 3
         self.to_win = 2
         #self.to_win = self.size * self.initial + 1
+        self.empty_state = np.zeros((2, self.size, 2*self.size*self.initial))
         self.houses = np.full((2, size),
                               fill_value=4,
                               dtype=int)
@@ -28,6 +29,7 @@ class Game:
         s += '\n'
         return s
 
+    '''
     def get_state(self, player):
         if self.player == 0:
             return np.concatenate((self.houses[0],
@@ -35,6 +37,13 @@ class Game:
         else:
             return np.concatenate((self.houses[1],
                                    self.houses[0]))
+    '''
+    def get_state(self, player):
+        state = self.empty_state.copy()
+        idx = np.indices(self.houses.shape)
+        # fun with numpy
+        state[idx[0], idx[1], self.houses[idx[0], idx[1]]] = 1
+        return state.flatten()
 
     def check_done(self):
         '''

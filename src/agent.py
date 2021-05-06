@@ -1,23 +1,25 @@
 import numpy as np
 import os
 from tensorflow import keras
-from tensorflow.keras.layers import Activation, Dense, Input
+from tensorflow.keras.layers import Activation, Dense, Dropout, Input
 from tensorflow.keras.models import Model
 
 
 class Agent:
     model_dir = 'trained_models'
 
-    def __init__(self, epsilon, discount=1, size=6):
+    def __init__(self, epsilon, discount=1, size=3, state_size=12):
         self.discount = discount
         self.epsilon = epsilon
         self.size = size
+        self.state_size = state_size
         self.model = None
     
     def initialize_model(self):
-        inputs = Input(self.size * 2, name='input')
+        inputs = Input(self.state_size, name='input')
         x = inputs
         x = Dense(32)(x)
+        x = Dropout(0.5)(x)
         x = Dense(32)(x)
         x = Dense(self.size, name='output')(x)
         self.model = Model(inputs, x, name='model')

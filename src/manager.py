@@ -9,8 +9,8 @@ class Manager:
     def __init__(self, size=6):
         self.size = size
         self.model_names = [None, None]
-        self.agents = [Agent(epsilon=0.1, size=self.size),
-                       Agent(epsilon=0.1, size=self.size)]
+        self.agents = [Agent(epsilon=0.1, state_size=108),
+                       Agent(epsilon=0.1, state_size=108)]
 
     def play_game(self):
         '''play a single game between agents'''
