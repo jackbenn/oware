@@ -6,7 +6,7 @@ from tensorflow.keras.models import Model
 
 
 class Agent:
-    model_dir = 'models'
+    model_dir = 'trained_models'
 
     def __init__(self, epsilon, discount=1, size=6):
         self.discount = discount
@@ -17,12 +17,13 @@ class Agent:
     def initialize_model(self):
         inputs = Input(self.size * 2, name='input')
         x = inputs
-        x = Dense(16)(x)
+        x = Dense(32)(x)
         x = Dense(32)(x)
         x = Dense(self.size, name='output')(x)
         self.model = Model(inputs, x, name='model')
         # no idea the best opitmizer
-        self.model.compile(optimizer='adam',
+        opt = keras.optimizers.Adam(learning_rate=1)
+        self.model.compile(optimizer=opt,
                            loss='mean_squared_error')
 
     def update(self, last_state, last_action, reward, state):

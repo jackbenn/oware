@@ -4,8 +4,9 @@ import numpy as np
 class Game:
     def __init__(self, size=6):
         self.size = size
-        self.initial = 4
-        self.to_win = self.size * self.initial + 1
+        self.initial = 3
+        self.to_win = 2
+        #self.to_win = self.size * self.initial + 1
         self.houses = np.full((2, size),
                               fill_value=4,
                               dtype=int)
@@ -15,6 +16,7 @@ class Game:
         self.winner = 0.5
 
     def __str__(self):
+        '''Return human-readable display of board, as an str'''
         s = '\n'
         s += f' {self.score[1]:2}  '
         s += ''.join(f'({x:2} )' for x in self.houses[1, ::-1])
@@ -29,12 +31,17 @@ class Game:
     def get_state(self, player):
         if self.player == 0:
             return np.concatenate((self.houses[0],
-                                   self.houses[1, ::-1]))
+                                   self.houses[1]))
         else:
-            return np.concatenate((self.houses[1, ::-1],
+            return np.concatenate((self.houses[1],
                                    self.houses[0]))
 
     def check_done(self):
+        '''
+        Check if the game is complete, and update
+        internal attribute (self.winner, self.done)
+        Returns: bool (whether the game is complete)
+        '''
         if self.score[0] >= self.to_win:
             self.done = True
             self.winner = 0

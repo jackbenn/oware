@@ -50,7 +50,7 @@ class Manager:
 
             player = 1 - player
             t += 1
-        print(f"{t:3} Winner is {game.winner}")
+        print(f"{t:3} Winner is {game.winner}", flush=True)
         return game.winner
 
     def load_agents(self):
