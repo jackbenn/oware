@@ -3,6 +3,7 @@ import os
 from tensorflow import keras
 from tensorflow.keras.layers import Activation, Dense, Dropout, Input
 from tensorflow.keras.models import Model
+from tensorflow.keras import initializers
 
 
 class Agent:
@@ -18,29 +19,44 @@ class Agent:
     def initialize_model(self):
         inputs = Input(self.state_size, name='input')
         x = inputs
-        x = Dense(32)(x)
+        x = Dense(32,
+                  kernel_initializer=initializers.RandomNormal(stddev=0.000001),
+                  activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(32)(x)
-        x = Dense(self.size, name='output')(x)
+        x = Dense(32,
+                  kernel_initializer=initializers.RandomNormal(stddev=0.00001),
+                  activation='relu')(x)
+        x = Dense(self.size, name='output',
+                  kernel_initializer=initializers.RandomNormal(stddev=0.0001))(x)
         self.model = Model(inputs, x, name='model')
         # no idea the best opitmizer
-        opt = keras.optimizers.Adam(learning_rate=1)
+        opt = keras.optimizers.Adam(learning_rate=.01)
         self.model.compile(optimizer=opt,
                            loss='mean_squared_error')
 
     def update(self, last_state, last_action, reward, state):
         # terminal state has state == None
+
         if state is None:
             qmax = 0
         else:
             qmax = np.max(self.predict(state))
         
         last_qs = self.predict(last_state)
+
+        print(reward, last_action)
+        print(last_qs)
+        #if reward != 0:
+        #    print(reward, last_action, last_qs)
+
         #print(last_qs)
         last_qs[last_action] = reward + self.discount * qmax
+
         self.model.fit(last_state[None, :],
                        last_qs[None, :],
                         verbose=0)
+        print(self.predict(last_state))
+        print()
 
     def move(self, last_state, last_action, reward, state):
         '''Decide on the next move and update the model
