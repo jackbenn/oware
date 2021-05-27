@@ -19,15 +19,16 @@ class Agent:
     def initialize_model(self):
         inputs = Input(self.state_size, name='input')
         x = inputs
-        x = Dense(32,
-                  kernel_initializer=initializers.RandomNormal(stddev=0.000001),
+        x = Dense(512,
+                  kernel_initializer=initializers.RandomNormal(stddev=0.00000001),
                   activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(32,
-                  kernel_initializer=initializers.RandomNormal(stddev=0.00001),
+        x = Dense(256,
+                  kernel_initializer=initializers.RandomNormal(stddev=0.0000001),
                   activation='relu')(x)
+        x = Dropout(0.5)(x)
         x = Dense(self.size, name='output',
-                  kernel_initializer=initializers.RandomNormal(stddev=0.0001))(x)
+                  kernel_initializer=initializers.RandomNormal(stddev=0.000001))(x)
         self.model = Model(inputs, x, name='model')
         # no idea the best opitmizer
         opt = keras.optimizers.Adam(learning_rate=.01)
