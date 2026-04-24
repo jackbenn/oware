@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class Manager:
-    def __init__(self, size=6):
+    def __init__(self, size=6, capture_scale=0.1):
         self.size = size
+        self.capture_scale = capture_scale
         self.model_names = [None, None]
         self.agents = [Agent(epsilon=0.1, state_size=114),
                        Agent(epsilon=0.1, state_size=114)]
@@ -23,8 +24,8 @@ class Manager:
         player = 0
         states = [[None], [None]]
         actions = [[None], [None]]
-        old_score = (0, 0)
         losses = []
+        pending_reward = [0.0, 0.0]
 
         if not train:
             saved_epsilons = [a.epsilon for a in self.agents]
@@ -39,29 +40,31 @@ class Manager:
 
             last_state = states[player][-2] if train else None
             last_action = actions[player][-1] if train else None
-            action, loss = agent.move(last_state, last_action, 0,
+            action, loss = agent.move(last_state, last_action, pending_reward[player],
                                       states[player][-1], legal_moves)
+            pending_reward[player] = 0.0
             if loss is not None:
                 losses.append(loss)
 
             actions[player].append(action)
-            game.move(action)
+            captures = game.move(action)
+            if train:
+                pending_reward[player] += captures * self.capture_scale
 
-            logger.debug('%3d  p%d -> house %d', t, player, action)
-            if tuple(game.score) != old_score:
-                logger.debug('     score %s\n%s', game.score, game)
-                old_score = tuple(game.score)
+            logger.debug('%3d  p%d -> house %d  score=%s\n%s',
+                         t, player, action, game.score, game)
 
             if game.done:
                 if train:
-                    reward = 1 if player == game.winner else -1
+                    game_reward = 1 if player == game.winner else -1
                     _, loss = agent.move(states[player][-1],
-                                         actions[player][-1], reward, None)
+                                         actions[player][-1],
+                                         game_reward + pending_reward[player], None)
                     if loss is not None:
                         losses.append(loss)
                     _, loss = self.agents[1-player].move(states[1-player][-1],
                                                          actions[1-player][-1],
-                                                         -reward, None)
+                                                         -game_reward + pending_reward[1-player], None)
                     if loss is not None:
                         losses.append(loss)
                 break
@@ -113,6 +116,8 @@ if __name__ == '__main__':
     parser.add_argument('--no-train', action='store_true', help='Play without training')
     parser.add_argument('--list', action='store_true', help='List saved models and exit')
     parser.add_argument('-v', '--verbose', action='store_true', help='Show per-move detail')
+    parser.add_argument('--capture-scale', type=float, default=0.1,
+                        help='Reward per captured stone (default 0.1)')
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -124,7 +129,7 @@ if __name__ == '__main__':
         list_models()
     else:
         train = not args.no_train
-        m = Manager(size=3)
+        m = Manager(size=3, capture_scale=args.capture_scale)
         m.model_names = [args.model0, args.model1]
         m.load_agents()
 

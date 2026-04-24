@@ -5,8 +5,7 @@ class Game:
     def __init__(self, size=6):
         self.size = size
         self.initial = 3
-        self.to_win = 2
-        #self.to_win = self.size * self.initial + 1
+        self.to_win = self.size * self.initial + 1  # majority of all stones
         self.empty_state = np.zeros((2, self.size, 2*self.size*self.initial+1))
         self.houses = np.full((2, size),
                               fill_value=self.initial,
