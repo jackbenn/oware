@@ -1,8 +1,11 @@
+import logging
 import numpy as np
 import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
+logger = logging.getLogger(__name__)
 
 
 class QNetwork(nn.Module):
@@ -57,10 +60,6 @@ class Agent:
             qmax = np.max(self.predict(state))
 
         last_qs = self.predict(last_state).copy()
-
-        print(reward, last_action)
-        print(last_qs)
-
         last_qs[last_action] = reward + self.discount * qmax
 
         self.model.train()
@@ -68,18 +67,20 @@ class Agent:
         x = torch.FloatTensor(last_state)
         target = torch.FloatTensor(last_qs)
         loss = self.loss_fn(self.model(x), target)
+        loss_val = loss.item()
         loss.backward()
         self.optimizer.step()
 
-        print(self.predict(last_state))
-        print()
+        logger.debug('  update: reward=%.1f  action=%d  loss=%.4f', reward, last_action, loss_val)
+        return loss_val
 
     def move(self, last_state, last_action, reward, state, legal_moves=None):
+        loss = None
         if last_state is not None:
-            self.update(last_state, last_action, reward, state)
+            loss = self.update(last_state, last_action, reward, state)
 
         if state is None:
-            return
+            return None, loss
 
         qs = self.predict(state)
         if legal_moves is not None:
@@ -91,7 +92,7 @@ class Agent:
             action = np.random.choice(choices)
         else:
             action = np.random.choice(np.flatnonzero(qs == qs.max()))
-        return action
+        return action, loss
 
     def save(self, filename):
         path = os.path.join(self.model_dir, filename)
