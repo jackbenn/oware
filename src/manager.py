@@ -25,10 +25,12 @@ class Manager:
         while True:
             agent = self.agents[player]
             states[player].append(game.get_state(player))
+            legal_moves = [i for i in range(self.size) if game.houses[player, i] > 0]
             action = agent.move(states[player][-2],
                                 actions[player][-1],
                                 0,
-                                states[player][-1])
+                                states[player][-1],
+                                legal_moves)
             actions[player].append(action)
             game.move(action)
 

@@ -62,10 +62,10 @@ class Game:
             self.winner = 0.5
         elif self.houses[0].max() == 0:
             self.done = True
-            self.winner = 0
+            self.winner = 1
         elif self.houses[1].max() == 0:
             self.done = True
-            self.winner = 1
+            self.winner = 0
         return self.done
 
     def move(self, house):
@@ -114,11 +114,18 @@ class Game:
             return captures
 
         current_house = house
-        while (self.houses[side, current_house] in (2, 3) and
-               current_house >= 0):
-            captures += self.houses[side, house]
-            self.houses[side, house] = 0
+        chain = []
+        while current_house >= 0 and self.houses[side, current_house] in (2, 3):
+            chain.append(current_house)
             current_house -= 1
+
+        # grand slam: would leave opponent with no stones, so don't capture
+        if sum(self.houses[side, h] for h in chain) == self.houses[side].sum():
+            return captures
+
+        for h in chain:
+            captures += self.houses[side, h]
+            self.houses[side, h] = 0
         self.score[1-side] += captures
         return captures
 

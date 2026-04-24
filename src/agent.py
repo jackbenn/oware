@@ -20,15 +20,15 @@ class Agent:
         inputs = Input(self.state_size, name='input')
         x = inputs
         x = Dense(512,
-                  kernel_initializer=initializers.RandomNormal(stddev=0.00000001),
+                  kernel_initializer='he_normal',
                   activation='relu')(x)
         x = Dropout(0.5)(x)
         x = Dense(256,
-                  kernel_initializer=initializers.RandomNormal(stddev=0.0000001),
+                  kernel_initializer='he_normal',
                   activation='relu')(x)
         x = Dropout(0.5)(x)
         x = Dense(self.size, name='output',
-                  kernel_initializer=initializers.RandomNormal(stddev=0.000001))(x)
+                  kernel_initializer='glorot_uniform')(x)
         self.model = Model(inputs, x, name='model')
         # no idea the best opitmizer
         opt = keras.optimizers.Adam(learning_rate=.01)
@@ -59,7 +59,7 @@ class Agent:
         print(self.predict(last_state))
         print()
 
-    def move(self, last_state, last_action, reward, state):
+    def move(self, last_state, last_action, reward, state, legal_moves=None):
         '''Decide on the next move and update the model
          * Predict the q values for all the possible actions from state
          * Update the model based on the rewards from the prior step
@@ -68,25 +68,28 @@ class Agent:
             last_state: the previous state, used in the update
             reward: the reward since the last state, use in the update
             state: current state
+            legal_moves: list of legal move indices; illegal moves are masked
         Returns:
             the new state
             the reward from that move?
         '''
         if last_state is not None: # if this isn't the first move
             self.update(last_state, last_action, reward, state)
-    
+
         if state is None:  # if we're done with the game
             return
 
         qs = self.predict(state)
+        if legal_moves is not None:
+            mask = np.ones(self.size, dtype=bool)
+            mask[legal_moves] = False
+            qs[mask] = -np.inf
+        choices = legal_moves if legal_moves is not None else list(range(self.size))
         if np.random.random() < self.epsilon:
-            #print('random', end='')
-            action = np.random.randint(self.size)
+            action = np.random.choice(choices)
         else:
             # choose randomly among ties
-            action = np.random.choice(np.flatnonzero(qs ==
-                                                     qs.max()))
-        #print(action)
+            action = np.random.choice(np.flatnonzero(qs == qs.max()))
         return action
 
     def predict(self, state):
